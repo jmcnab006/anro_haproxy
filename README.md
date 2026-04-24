@@ -1,4 +1,3 @@
-# anro_haproxy
 # [Ansible role haproxy]
 
 Install and configure haproxy on your system.
@@ -39,7 +38,7 @@ Refer to [argument specifications](meta/argument_specs.yaml) for detailed inform
 
 The default values for the variables are set in [`defaults/main.yml`]:
 
-#### HAProxy 'stats'
+### HAProxy 'stats'
 ```yaml
 anro_haproxy_stats_enabled: true
 anro_haproxy_stats_port: 1936
@@ -48,7 +47,7 @@ anro_haproxy_stats_uri: /
 anro_haproxy_stats_config: []
 ```
 
-# HAProxy 'global'
+### HAProxy 'global'
 ```yaml
 anro_haproxy_global_log: 
     - /dev/log    local0
@@ -82,7 +81,7 @@ anro_haproxy_global_config: []
 anro_haproxy_global_daemon: true
 ```
 
-# HAProxy 'default' section
+### HAProxy 'default' section
 ```yaml
 anro_haproxy_defaults_option:
   - httplog
@@ -110,7 +109,7 @@ anro_haproxy_defaults_errorfile:
 anro_haproxy_defaults_config: []
 ```
 
-# HAProxy 'peer'
+### HAProxy 'peer'
 ```yaml
 anro_haproxy_peer_enabled: false
 anro_haproxy_peer_name: haproxy_peer
@@ -126,7 +125,7 @@ haproxy_peer_peers:
   - hostname2 192.168.15.121:1024
 ```
 
-# HAProxy 'cache'
+### HAProxy 'cache'
 ```yaml
 anro_haproxy_cache_enabled: false
 anro_haproxy_cache:
@@ -138,12 +137,12 @@ anro_haproxy_cache:
     max_secondary_entries: 10
 ```
 
-# HAProxy 'frontends'
+### HAProxy 'frontends'
 ```yaml
 anro_haproxy_frontends: []
 ```
 
-# HAProxy 'backends'
+### HAProxy 'backends'
 ```yaml
 anro_haproxy_backend_default_balance: roundrobin
 ```
@@ -151,14 +150,14 @@ anro_haproxy_backend_default_balance: roundrobin
 anro_haproxy_backends: []
 ```
 
-# HAProxy 'listens'
+### HAProxy 'listens'
 ```yaml
 anro_haproxy_listen_default_balance: roundrobin
 ```
 ```yaml
 anro_haproxy_listens: []
 ```
-## Example1 playbook
+### Example1 playbook
 
 ```yaml
 ---
@@ -273,7 +272,7 @@ anro_haproxy_listens: []
                 config: ["cookie s4", "maxconn 100", "check inter 1s"]
 ```
 
-## Example1 playbook
+### Example1 playbook
 ```yaml
 ---
 - name: HAPROXY Example2
