@@ -1,0 +1,153 @@
+---
+
+- name: Assert | Test haproxy_stats_enabled
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_stats_enabled is defined
+      - anro_haproxy_stats_enabled is boolean
+    quiet: true
+
+- name: Assert | Test haproxy_stats_port
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_stats_port is defined
+      - anro_haproxy_stats_port is number
+      - anro_haproxy_stats_port > 0
+      - anro_haproxy_stats_port < 65536
+    quiet: true
+
+- name: Assert | Test haproxy_stats_address
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_stats_address is defined
+      - anro_haproxy_stats_address is string
+      - anro_haproxy_stats_address is not none
+    quiet: true
+
+- name: Assert | Test haproxy_peer_mode
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_peer_mode is defined
+      - anro_haproxy_peer_mode is string
+      - anro_haproxy_peer_mode in [ "auto", "manual"]
+    quiet: true
+
+- name: Assert | Test haproxy_frontends
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_frontends is defined
+      - anro_haproxy_frontends is iterable
+    quiet: true
+
+- name: Assert | Test haproxy_backends
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_backends is defined
+      - anro_haproxy_backends is iterable
+    quiet: true
+
+- name: Assert | Test haproxy_backend_default_balance
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_backend_default_balance is defined
+      - anro_haproxy_backend_default_balance is string
+      - anro_haproxy_backend_default_balance in [ "random", "roundrobin", "static-rr", "leastconn", "first", "source", "uri", "url_param", "hdr", "rdp-cookie" ]
+    quiet: true
+
+- name: Assert | Test item in haproxy_backends
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name is string
+      - item.name is not none
+      - (item.balance is defined
+        and item.balance is string
+        and item.balance in [ "random", "roundrobin", "static-rr", "leastconn", "first", "source", "uri", "url_param", "hdr", "rdp-cookie" ])
+        or item.balance is undefined
+      - item.servers is defined
+      - item.servers is iterable
+      - item.port is defined
+      - item.port is number
+      - item.port > 0
+      - item.port < 65536
+     # - (item.options is defined and item.options is iterable) or item.options is undefined
+    quiet: true
+  loop: "{{ anro_haproxy_backends }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Assert | Test optional item haproxy_backends
+  ansible.builtin.assert:
+    that:
+      - item.mode is string
+      - item.mode in [ "http", "tcp" ]
+    quiet: true
+  loop: "{{ anro_haproxy_backends }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.mode is defined
+
+- name: Assert | Test haproxy_listens
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_listens is defined
+      - anro_haproxy_listens is iterable
+    quiet: true
+
+- name: Assert | Test item in haproxy_listens
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name is string
+      - item.name is not none
+      - item.servers is defined
+      - item.servers is iterable
+    quiet: true
+  loop: "{{ anro_haproxy_listens }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Assert | Test item in haproxy_listens with ssl
+  ansible.builtin.assert:
+    that:
+      - item.ssl is boolean
+      - item.crts is defined
+      - item.crts is iterable
+    quiet: true
+  loop: "{{ anro_haproxy_listens }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.ssl is defined
+
+- name: Assert | Test optional item haproxy_listens
+  ansible.builtin.assert:
+    that:
+      - item.mode is string
+      - item.mode in [ "http", "tcp" ]
+    quiet: true
+  loop: "{{ anro_haproxy_listens }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.mode is defined
+
+- name: Assert | Test haproxy_listen_default_balance
+  ansible.builtin.assert:
+    that:
+      - anro_haproxy_listen_default_balance is defined
+      - anro_haproxy_listen_default_balance is string
+      - anro_haproxy_listen_default_balance in [ "roundrobin", "static-rr", "leastconn", "first", "source", "uri", "url_param", "hdr", "rdp-cookie" ]
+    quiet: true
+
+- name: Assert | Test httpcheck item in haproxy_listens
+  ansible.builtin.assert:
+    that:
+      - item.httpcheck is boolean
+    quiet: true
+  loop: "{{ anro_haproxy_listens }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.httpcheck is defined

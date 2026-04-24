@@ -1,0 +1,156 @@
+---
+
+argument_specs:
+  main:
+    short_description: "Install and configure haproxy on your system."
+    description: >
+      Install and configure haproxy on your system.
+    author: Jeremy McNab
+    options:
+      anro_haproxy_stats:
+        type: "bool"
+        default: true
+        description: "Enable haproxy stats configuration."
+      anro_haproxy_stats_port:
+        type: "int"
+        default: 1936
+        description: "The port binding for haproxy stats."
+      anro_haproxy_stats_addr:
+        type: "str"
+        default: "0.0.0.0"
+        description: "The address to bind haproxy stats to."
+      anro_haproxy_stats_uri:
+        type: "str"
+        default: "/"
+        description: "The haproxy stats base uri."
+      anro_haproxy_stats_config:
+        type: "list"
+        default: []
+        description: "List of haproxy 'stats' specific config."
+      anro_haproxy_global_log:
+        type: "list"
+        default:
+          - "/dev/log    local0"
+          - "/dev/log    local1 notice"
+        description: "List of haproxy global log configuration."
+      anro_haproxy_global_settings:
+        type: "dict"
+        default:
+          chroot: "/var/lib/haproxy"
+          user: "haproxy"
+          group: "haproxy"
+          ca-base: "/etc/ssl/certs"
+          crt-base: "/etc/ssl/private"
+          ssl-default-bind-ciphers: >-
+            "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384"
+          ssl-default-bind-ciphersuites: "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
+          ssl-default-bind-options: "ssl-min-ver TLSv1.2 no-tls-tickets"
+        description: "Key pair value of haproxy global settings."
+      anro_haproxy_global_stats:
+        type: "list"
+        default:
+          - "socket /run/haproxy/admin.sock mode 660 level admin"
+          - "timeout 30s"
+        description: "List of haproxy global 'stats' directives."
+      anro_haproxy_global_daemon:
+        type: "bool"
+        default: true
+        description: "Run haproxy as daemon."
+      anro_haproxy_global_config:
+        type: "list"
+        default: []
+        description: "List of haproxy global configuration lines."
+      anro_haproxy_defaults_settings:
+        type: "dict"
+        default:
+          log: "global"
+          mode: "http"
+          retries: 3
+          maxconn: 20000
+        description: "Key pair value of haproxy default settings."
+      anro_haproxy_defaults_option:
+        type: "list"
+        default:
+          - "httplog"
+          - "dontlognull"
+        description: "HAProxy defaults 'option' directives."
+      anro_haproxy_defaults_timeout:
+        type: "list"
+        default:
+          - "connect 5000"
+          - "client 500000"
+          - "server 500000"
+        description: "HAProxy defaults 'timeout' directives."
+      anro_haproxy_defaults_errorfile:
+        type: "list"
+        default:
+          - "400 /etc/haproxy/errors/400.http"
+          - "403 /etc/haproxy/errors/403.http"
+          - "408 /etc/haproxy/errors/408.http"
+          - "500 /etc/haproxy/errors/500.http"
+          - "502 /etc/haproxy/errors/502.http"
+          - "503 /etc/haproxy/errors/503.http"
+          - "504 /etc/haproxy/errors/504.http"
+        description: "HAProxy defaults 'errorfile' directives."
+      anro_haproxy_defaults_config:
+        type: "list"
+        default: []
+        description: "List of haproxy defaults configuration lines."
+      anro_haproxy_peer_enabled:
+        type: "bool"
+        default: false
+        description: "Enable haproxy peer directives"
+      anro_haproxy_peer_name:
+        type: "str"
+        default: "haproxy_peer"
+        description: "Unique name for haproxy peer group."
+      anro_haproxy_peer_group:
+        type: "str"
+        default: "{{ group_names[0] }}"
+        description: "Specific group to use as peer group."
+      anro_haproxy_peer_mode:
+        type: "str"
+        default: "auto"
+        description: "Generate haproxy peer list from ansible group list or manually from haproxy_peer_peers var."
+      anro_haproxy_peer_port:
+        type: "int"
+        default: 1024
+        description: "Peer communication port default."
+      anro_haproxy_peer_peers:
+        type: "list"
+        default: []
+        description: "List of manual peer entries. i.e. - 'hostname1 192.168.15.120:1024'"
+      anro_haproxy_cache_enabled:
+        type: "bool"
+        default: false
+        description: "Enable haproxy cache directives"
+      anro_haproxy_cache:
+        type: "list"
+        default:
+          - name: "cache"
+            total_max_size: 20
+            max_object_size: 10485760
+            max_age: 120
+            process_vary: true
+            max_secondary_entries: 10
+        description: "Default cache entry."
+      anro_haproxy_frontends:
+        type: "list"
+        default: []
+        description: "A list of frontends."
+      anro_haproxy_backend_default_balance:
+        type: "str"
+        default: "roundrobin"
+        description: "The default balance for backends."
+      anro_haproxy_backends:
+        type: "list"
+        default: []
+        description: "A list of backends."
+      anro_haproxy_listen_default_balance:
+        type: "str"
+        default: "roundrobin"
+        description: "The default balance for listens."
+      anro_haproxy_listens:
+        type: "list"
+        default: []
+        description: "A list of listens."

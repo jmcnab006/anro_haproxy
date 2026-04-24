@@ -1,0 +1,170 @@
+{{ ansible_managed | comment }}
+
+global
+{% for setting in anro_haproxy_global_log %}
+    log		{{ setting }}
+{% endfor %}
+{% if anro_haproxy_global_settings is defined and anro_haproxy_global_settings %}
+{% for key, value in anro_haproxy_global_settings.items() %}
+    {{ key }}   {{ value }}
+{% endfor %}
+{% endif +%}
+{% if anro_haproxy_global_stats is defined and anro_haproxy_global_stats | length > 0 %}
+{% for setting in anro_haproxy_global_stats %}
+    stats       {{ setting }}
+{% endfor %}
+{% endif %}
+{% if anro_haproxy_global_daemon is defined and anro_haproxy_global_daemon == true %}    daemon{% endif +%}
+{% if  anro_haproxy_global_config is defined and anro_haproxy_global_config | length > 0 %}
+{% for setting in anro_haproxy_global_config %}
+    {{ setting }}
+{% endfor %}
+{% endif %}
+
+defaults
+{% if anro_haproxy_defaults_settings is defined and anro_haproxy_defaults_settings %}
+{% for key, value in anro_haproxy_defaults_settings.items() %}
+    {{ key }} {{ value }}
+{% endfor %}
+{% endif +%}
+{% if anro_haproxy_defaults_option is defined and anro_haproxy_defaults_option | length > 0 %}
+{% for setting in anro_haproxy_defaults_option %}
+    option    {{ setting }}
+{% endfor %}
+{% endif %}
+{% if anro_haproxy_defaults_timeout is defined and anro_haproxy_defaults_timeout | length > 0 %}
+{% for setting in anro_haproxy_defaults_timeout %}
+    timeout   {{ setting }}
+{% endfor %}
+{% endif %}
+{% if anro_haproxy_defaults_errorfile is defined and anro_haproxy_defaults_errorfile | length > 0 %}
+{% for setting in anro_haproxy_defaults_errorfile %}
+    errorfile {{ setting }}
+{% endfor %}
+{% endif %}
+{% if anro_haproxy_defaults_config is defined and anro_haproxy_defaults_config | length > 0 %}
+{% for setting in anro_haproxy_defaults_config %}
+    {{ setting }}
+{% endfor %}
+{% endif %}
+
+{% if anro_haproxy_peer_enabled is defined and anro_haproxy_peer_enabled == true %}
+# HAPROXY PEER 
+peers {{ anro_haproxy_peer_name }}
+{% if anro_haproxy_peer_mode  == 'auto' %}
+{% for item in groups[ anro_haproxy_peer_group ] %}
+peer {{ item }} {{ hostvars[item]['ansible_host'] }}:{{ anro_haproxy_peer_port }}
+{% endfor %}
+{% else %}
+{% if anro_haproxy_peer_peers is defined and anro_haproxy_peer_peers | length > 0 %}
+{% for item in anro_haproxy_peer_peers %}
+peer {{ item }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if anro_haproxy_stats_enabled == true %}
+# HAPROXY STATS 
+listen stats
+    bind     {{ anro_haproxy_stats_address }}:{{ anro_haproxy_stats_port }}
+    mode     http
+    stats    enable
+    stats    uri {{ anro_haproxy_stats_uri | default('/stats') }}
+{% if anro_haproxy_stats_settings is defined and anro_haproxy_stats_settings | length > 0 %}
+{% for setting in anro_haproxy_stats_settings %}
+    stats    {{ setting }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if anro_haproxy_frontends is defined and anro_haproxy_frontends | length > 0 %}
+# HAPROXY FRONTENDS
+{% for frontend in anro_haproxy_frontends %}
+# {{ frontend.name | upper }} 
+frontend {{ frontend.name }}
+{% for bind in frontend.binds %}
+    bind {{ bind.address | default("")}}:{{ bind.port }} {{ bind.options | default("") | join(' ')}}
+{% endfor %}
+    mode {{ frontend.mode | default('http') }}
+{% if frontend.force_https is defined and frontend.force_https %}
+    http-request redirect scheme https code 301 if !{ ssl_fc }
+{% endif %}
+{% if frontend.config is defined and frontend.config | length > 0 %}
+{% for setting in frontend.config %}
+    {{ setting }}
+{% endfor %}
+{% endif %}
+{% if frontend.default_backend is defined %}
+    default_backend {{ frontend.default_backend }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if anro_haproxy_cache_enabled is defined and anro_haproxy_cache_enabled == true %}
+{% if anro_haproxy_cache is defined and anro_haproxy_cache %}
+# HAPROXY CACHE
+{% for cache in anro_haproxy_cache %}
+# {{ cache.name | upper }} 
+cache {{ cache.name }}
+{% if cache.total_max_size is defined %}    total-max-size           {{ cache.total_max_size }}{% endif +%}
+{% if cache.max_object_size is defined %}    max-object-size          {{ cache.max_object_size }}{% endif +%}
+{% if cache.max_age is defined %}    max-age                  {{ cache.max_age }}{% endif +%}
+{% if cache.process_vary is defined and cache.process_vary == true%}    process-vary             on{% else %}    process-vary             off{% endif +%}
+{% if cache.max_secondary_entries is defined %}    max-secondary-entries    {{ cache.max_secondary_entries }}{% endif +%}
+
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if anro_haproxy_backends is defined and anro_haproxy_backends | length > 0 %}
+# HAPROXY BACKENDS
+{% for backend in anro_haproxy_backends %}
+# {{ backend.name | upper }} 
+backend {{ backend.name }}
+    balance {{ backend.balance | default(anro_haproxy_backend_default_balance) }}
+    mode {{ backend.mode | default('http') }}
+{% if backend.config is defined and backend.config | length > 0 %}
+{% for setting in backend.config %}
+    {{ setting }}
+{% endfor %}
+{% endif %}
+{% if backend.cookie is defined %}
+    cookie {{ backend.cookie }}
+{% endif %}
+{% for server in backend.servers %}
+{% if server.name is defined %}
+    server {{ server.name }} {{ server.address | default(hostvars[server.name]['ansible_default_ipv4']['address']) }}:{{ server.port | default(backend.port) }}{% if server.config is defined and server.config | length > 0 %} {{ server.config | join(' ') }}{% else %} {% endif %}
+{% endif +%}
+{% endfor %}
+
+{% endfor %}
+{% endif %}
+
+
+{% if anro_haproxy_listens is defined and anro_haproxy_listens | length > 0 %}
+# HAPROXY LISTEN
+{% for listen in anro_haproxy_listens %}
+# {{ listen.name | upper }}
+listen {{ listen.name }}
+{% for bind in listen.binds %}
+    bind {{ bind.address | default("") }}:{{ bind.port | default(listen.port) }} {{ bind.options | default("") | join(' ')}}
+{% endfor %}
+    balance {{ listen.balance | default(anro_haproxy_listen_default_balance) }}
+    mode {{ listen.mode | default('tcp') }}
+{% if listen.force_https is defined and frontend.force_https %}
+    http-request redirect scheme https code 301 if !{ ssl_fc }
+{% endif %}
+{% if listen.config is defined and listen.config | length > 0 %}
+{% for setting in listen.config %}
+    {{ setting }}
+{% endfor %}
+{% endif %}
+{% for server in listen.servers %}
+{% if server.name is defined %}
+    server {{ server.name }} {{ server.address }}:{{ server.port | default(listen.port) }}{% if server.config is defined and server.config | length > 0 %} {{ server.config | join(' ') }}{% else %} {% endif %}
+{% endif +%}
+{% endfor %}
+
+{% endfor %}
+{% endif %}

@@ -1,0 +1,100 @@
+---
+# defaults file for haproxy
+# Configure stats in HAProxy?
+anro_haproxy_stats_enabled: true
+anro_haproxy_stats_port: 1936
+anro_haproxy_stats_address: "0.0.0.0"
+anro_haproxy_stats_uri: "/"
+
+# HAProxy 'stats' settings that aren't covered by any other option can be added here as an array of strings which are prepended with 'stats'
+anro_haproxy_stats_config: []
+
+# HAProxy 'global' section
+anro_haproxy_global_log:
+  - "/dev/log    local0"
+  - "/dev/log    local1 notice"
+
+anro_haproxy_global_settings:
+  chroot: "/var/lib/haproxy"
+  user: "haproxy"
+  group: "haproxy"
+  ca-base: "/etc/ssl/certs"
+  crt-base: "/etc/ssl/private"
+# See: https://ssl-config.mozilla.org/#server=haproxy&server-version=2.0.3&config=intermediate
+  ssl-default-bind-ciphers: >-
+    ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+  ssl-default-bind-ciphersuites: "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
+  ssl-default-bind-options: "ssl-min-ver TLSv1.2 no-tls-tickets"
+
+# HAProxy global 'stats' directives
+anro_haproxy_global_stats:
+  - "socket /run/haproxy/admin.sock mode 660 level admin"
+  - "timeout 30s"
+
+anro_haproxy_global_daemon: true
+
+# HAProxy global settings that aren't covered by any other option can be added here as an array of strings
+anro_haproxy_global_config: []
+
+# HAProxy 'default' section
+anro_haproxy_defaults_settings:
+  log: "global"
+  mode: "http"
+  retries: 3
+  maxconn: 20000
+
+# HAProxy defaults 'option' directives, these can be zeroed out with an empty array or fully overwritten with custom values, prepended with 'option'
+anro_haproxy_defaults_option:
+  - "httplog"
+  - "dontlognull"
+
+# HAProxy defaults 'timeout' directives, these can be zeroed out with an empty array or fully overwritten with custom values, prepended with 'timeout'
+anro_haproxy_defaults_timeout:
+  - "connect 5000"
+  - "client 500000"
+  - "server 500000"
+
+# HAProxy defaults 'errorfile' directives, generally these should not need to be modified but can be zeroed out with an empty array
+anro_haproxy_defaults_errorfile:
+  - "400 /etc/haproxy/errors/400.http"
+  - "403 /etc/haproxy/errors/403.http"
+  - "408 /etc/haproxy/errors/408.http"
+  - "500 /etc/haproxy/errors/500.http"
+  - "502 /etc/haproxy/errors/502.http"
+  - "503 /etc/haproxy/errors/503.http"
+  - "504 /etc/haproxy/errors/504.http"
+
+# HAProxy defaults settings that aren't covered by any other option can be added here as an array of strings
+anro_haproxy_defaults_config: []
+
+# HAProxy 'peer' section
+anro_haproxy_peer_enabled: false
+anro_haproxy_peer_name: "haproxy_peer"
+anro_haproxy_peer_group: "{{ group_names[0] }}"
+anro_haproxy_peer_mode: "auto"
+anro_haproxy_peer_port: 1024
+anro_haproxy_peer_peers: []
+# haproxy_peer_peers:
+#   - "hostname1 192.168.15.120:1024"
+#   - "hostname2 192.168.15.121:1024"
+
+# https://www.haproxy.com/documentation/haproxy-configuration-tutorials/network-performance/caching/
+# create a default cache if enabled
+anro_haproxy_cache_enabled: false
+anro_haproxy_cache:
+  - name: "cache"
+    total_max_size: 20
+    max_object_size: 10485760
+    max_age: 120
+    process_vary: true
+    max_secondary_entries: 10
+
+anro_haproxy_frontends: []
+
+# https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/#4.2-balance
+anro_haproxy_backend_default_balance: roundrobin
+anro_haproxy_backends: []
+
+anro_haproxy_listen_default_balance: roundrobin
+# For the listening lists:
+anro_haproxy_listens: []
